@@ -56,7 +56,7 @@ class InitMessage(Message):
 
 class FINMessage(Message):
     def __init__(self):
-        super(FI Message, self).__init__(None)
+        super(FINMessage, self).__init__(None)
 
     @property
     def is_eos(self):

@@ -10,7 +10,6 @@ class Graph(Pyroutine):
         self.workdir = workdir or './'
         print("Created DAG {} with workdir {}".format(self.name, self.workdir))
 
-
     @property
     def workdir(self):
         if self._workdir:
@@ -18,11 +17,9 @@ class Graph(Pyroutine):
         else:
             return ""
 
-
     @workdir.setter
     def workdir(self, dir):
         self._workdir = dir
-
 
     def connect(self, port1, port2):
         # Add nodes that are not in the node list
@@ -39,8 +36,8 @@ class Graph(Pyroutine):
         port1.connect(port2)
         # self._arcs.update(port1.connect_dict)
 
-    def set_initial_packet(self, port, value):
-        port.set_initial_packet(value)
+    def set_initial_message(self, port, value):
+        port.set_initial_message(value)
 
     def set_kickstarter(self, port):
         port.kickstart()

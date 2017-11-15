@@ -7,7 +7,7 @@ from pyasyncsp.message import Message
 from pyasyncsp.graph import Graph
 
 
-class Printer(Node):
+class Printer(Pyroutine):
     def __init__(self, name):
         super(Printer, self).__init__(name)
 
@@ -18,7 +18,7 @@ class Printer(Node):
             print(show_str)
 
 
-class Adder(Node):
+class Adder(Pyroutine):
     """
     A Node that sums the value of the recieved signals
     """
@@ -40,7 +40,7 @@ class Adder(Node):
                 await self.outputs.ADD_OUT.send_message(summed)
 
 
-class RandomSource(Node):
+class RandomSource(Pyroutine):
         """
         This Node generates random no signals
         """
