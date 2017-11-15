@@ -31,13 +31,13 @@ class Adder(Pyroutine):
 
     async def __call__(self):
         while True:
-                in_messages_1 = await self.inputs.IN1.receive()
-                print("in_message_1 = {}".format(in_messages_1))
-                in_messages_2 = await self.inputs.IN2.receive()
-                print("in_message_2 = {}".format(in_messages_1))
-                summed = Signal(in_messages_1.value + in_messages_2.value)
-                # print(summed)
-                await self.outputs.ADD_OUT.send_message(summed)
+            in_messages_1 = await self.inputs.IN1.receive()
+            print("in_message_1 = {}".format(in_messages_1))
+            in_messages_2 = await self.inputs.IN2.receive()
+            print("in_message_2 = {}".format(in_messages_1))
+            summed = Signal(in_messages_1.value + in_messages_2.value)
+            # print(summed)
+            await self.outputs.ADD_OUT.send_message(summed)
 
 
 class RandomSource(Pyroutine):
@@ -45,17 +45,17 @@ class RandomSource(Pyroutine):
         This Node generates random no signals
         """
         def __init__(self, name):
-                super(RandomSource, self).__init__(name)
-                self.name = name
-                self.outputs.add(OutputPort("Rand_OUT"))
+            super(RandomSource, self).__init__(name)
+            self.name = name
+            self.outputs.add(OutputPort("Rand_OUT"))
 
         async def __call__(self):
-                while True:
-                        #generate IP containing random number
-                        a = Signal(random())
-                        #send to the output port
-                        await self.outputs.Rand_OUT.send_message(a)
-                        await asyncio.sleep(0)
+            while True:
+                # generate IP containing random number
+                a = Signal(random())
+                # send to the output port
+                await self.outputs.Rand_OUT.send_message(a)
+                await asyncio.sleep(0)
 
 g = Graph('demo')
 
@@ -63,20 +63,19 @@ s1 = RandomSource("s1")
 s2 = RandomSource("s2")
 adder = Adder("sum_them")
 printer = Printer("show_it")
-#The printer needs an input port
+# The printer needs an input port
 printer.inputs.add(InputPort("IN"))
 
-#Now we connect the components
+# Now we connect the components
 
 s1.outputs.Rand_OUT.connect(adder.inputs.IN1)
 s2.outputs.Rand_OUT.connect(adder.inputs.IN2)
 adder.outputs.ADD_OUT.connect(printer.inputs.IN)
 
-#Now we need to add them to a Graph instance to be able to run them.
+# Now we need to add them to a Graph instance to be able to run them.
 
 g.add_node(s1)
 g.add_node(s2)
 g.add_node(adder)
 g.add_node(printer)
-    
 g()
