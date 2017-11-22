@@ -1,7 +1,7 @@
 import asyncio
 
-from pyasyncsp.port import PortRegister
-from pyasyncsp.message import Message
+from .port import PortRegister
+from .message import Message
 
 # Change this horrific way
 _global_dag = None

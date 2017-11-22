@@ -1,10 +1,10 @@
 import asyncio
 from random import random
 
-from pyasyncsp.pyroutine import Pyroutine
+from pyasyncsp import Pyroutine
 from pyasyncsp.port import InputPort, OutputPort
 from pyasyncsp.message import Message
-from pyasyncsp.graph import Graph
+from pyasyncsp import Graph
 
 
 class Printer(Pyroutine):
@@ -35,7 +35,7 @@ class Adder(Pyroutine):
             print("in_message_1 = {}".format(in_messages_1))
             in_messages_2 = await self.inputs.IN2.receive()
             print("in_message_2 = {}".format(in_messages_1))
-            summed = Signal(in_messages_1.value + in_messages_2.value)
+            summed = Message(in_messages_1.value + in_messages_2.value)
             # print(summed)
             await self.outputs.ADD_OUT.send_message(summed)
 
@@ -52,7 +52,7 @@ class RandomSource(Pyroutine):
         async def __call__(self):
             while True:
                 # generate IP containing random number
-                a = Signal(random())
+                a = Message(random())
                 # send to the output port
                 await self.outputs.Rand_OUT.send_message(a)
                 await asyncio.sleep(0)

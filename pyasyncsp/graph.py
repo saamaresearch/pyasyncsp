@@ -1,5 +1,5 @@
 import asyncio
-from pyasyncsp.pyroutine import Pyroutine
+from .pyroutine import Pyroutine
 
 
 class Graph(Pyroutine):

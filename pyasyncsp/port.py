@@ -1,8 +1,8 @@
 import asyncio
 from collections import OrderedDict
 
-from pyasyncsp.message import Message, InitMessage, FINMessage
-from pyasyncsp.connection import Connection
+from .message import Message, InitMessage, FINMessage
+from .connection import Connection
 
 
 class Port(object):
