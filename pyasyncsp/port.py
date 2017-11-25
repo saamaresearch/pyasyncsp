@@ -179,13 +179,15 @@ class PortRegister:
         futures = {}
         messages = {}
         for p in self.values():
-            # messages[p.name] = await p.receive_message()
+            messages[p.name] = await p.receive_message()
             if p.open:
                 futures[p.name] = asyncio.ensure_future(p.receive_message())
         for k, v in futures.items():
             data = await v
-            messages[k] = data
-        return messages
+            yield k, data
+        # TODO: remove the legacy lines if things dont brea
+        #     messages[k] = data
+        # return messages
 
     def __aiter__(self):
         return self

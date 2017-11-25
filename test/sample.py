@@ -14,7 +14,7 @@ class Printer(Pyroutine):
     async def __call__(self):
         while True:
             messages = await self.receive_messages()
-            show_str = "Node {} saw:\n".format(self.name) + "\n".join([str(p) for p in messages.values()])
+            show_str = " 👋 Node {} saw:\n".format(self.name) + "\n".join([str(p) for p in messages.values()])
             print(show_str)
 
 
@@ -31,11 +31,11 @@ class Adder(Pyroutine):
 
     async def __call__(self):
         while True:
-            in_messages_1 = await self.inputs.IN1.receive()
+            in_messages_1 = await self.inputs.IN1.receive_message()
             print("in_message_1 = {}".format(in_messages_1))
-            in_messages_2 = await self.inputs.IN2.receive()
+            in_messages_2 = await self.inputs.IN2.receive_message()
             print("in_message_2 = {}".format(in_messages_1))
-            summed = Message(in_messages_1.value + in_messages_2.value)
+            summed = Message(in_messages_1.value + in_messages_2.value, owner=self)
             # print(summed)
             await self.outputs.ADD_OUT.send_message(summed)
 
@@ -52,30 +52,35 @@ class RandomSource(Pyroutine):
         async def __call__(self):
             while True:
                 # generate IP containing random number
-                a = Message(random())
+                a = Message(random(), owner=self)
                 # send to the output port
                 await self.outputs.Rand_OUT.send_message(a)
-                await asyncio.sleep(0)
+                await asyncio.sleep(2)
 
-g = Graph('demo')
 
-s1 = RandomSource("s1")
-s2 = RandomSource("s2")
-adder = Adder("sum_them")
-printer = Printer("show_it")
-# The printer needs an input port
-printer.inputs.add(InputPort("IN"))
+def main():
+    g = Graph('demo')
 
-# Now we connect the components
+    s1 = RandomSource("s1")
+    s2 = RandomSource("s2")
+    adder = Adder("sum_them")
+    printer = Printer("show_it")
+    # The printer needs an input port
+    printer.inputs.add(InputPort("IN"))
 
-s1.outputs.Rand_OUT.connect(adder.inputs.IN1)
-s2.outputs.Rand_OUT.connect(adder.inputs.IN2)
-adder.outputs.ADD_OUT.connect(printer.inputs.IN)
+    # Now we connect the components
 
-# Now we need to add them to a Graph instance to be able to run them.
+    s1.outputs.Rand_OUT.connect(adder.inputs.IN1)
+    s2.outputs.Rand_OUT.connect(adder.inputs.IN2)
+    adder.outputs.ADD_OUT.connect(printer.inputs.IN)
 
-g.add_node(s1)
-g.add_node(s2)
-g.add_node(adder)
-g.add_node(printer)
-g()
+    # Now we need to add them to a Graph instance to be able to run them.
+
+    g.add_node(s1)
+    g.add_node(s2)
+    g.add_node(adder)
+    g.add_node(printer)
+    g.run()
+
+if __name__ == '__main__':
+    main()

@@ -73,8 +73,8 @@ class Graph(Pyroutine):
             yield from self._arcs[node]
         else:
             return
-  
-    def __call__(self):
+
+    def run(self):
         # Add code to the repository
         loop = asyncio.get_event_loop()
         self.loop = loop

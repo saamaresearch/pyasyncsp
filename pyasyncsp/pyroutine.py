@@ -8,6 +8,9 @@ _global_dag = None
 
 
 class Pyroutine(object):
+    """
+    A Python Coroutine object having inputs and outputs.
+    """
     def __init__(self, name):
         self.name = name
         # Input and output ports
