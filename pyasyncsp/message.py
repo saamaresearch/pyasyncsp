@@ -1,26 +1,36 @@
 import asyncio
 
+MAXHOPS = 6
+
 
 class Message(object):
     def __init__(self, value, owner=None):
-        self._value = value
+        self.value = value
         self._owner = owner
+        self._hopcount = MAXHOPS
         print(value)
 
     def drop(self):
         del self
 
     def __str__(self):
-        return "{} owned by {}, payload {}, payload type {}".format(self.__repr__(), self.owner, self.value, type(self.value))
+        return f"{self.__repr__()} owned by {self.owner}, payload {self.value}, payload type {type(self.value)}"
 
-    @property
+    @staticmethod
+    def decr_hopcount():
+        if self._hopcount > 0:
+            self._hopcount -= 1
+        else:
+            raise MsgMaxHopCountExceededError
+
+    ''' @property
     def value(self):
         return self._value
 
     @value.setter
     def value(self, value):
         raise ValueError('Cannot set value')
-
+    '''
     @property
     def owner(self):
         return self._owner
@@ -31,7 +41,7 @@ class Message(object):
             raise ValueError('Curr Owner: {}, Cannot set new'.format(self.owner))
         else:
             self._owner = value
-
+ 
     @property
     def is_eos(self):
         return False

@@ -20,12 +20,13 @@ class AnyPortPrinter(Pyroutine):
 
     async def __call__(self):
         while True:
-            async for port_name, incoming_msg in self.inputs.receive_messages():
-                # applying the select chan
-                to_print = self.select_chan[port_name](incoming_msg)
-                print(f"** {self.counter}: AT time: {time()}\
-                Received {to_print}")
-                self.counter += 1
+            pname, incoming_msg = await self.inputs.receive_messages()
+            
+            # applying the select chan
+            to_print = self.select_chan[pname](incoming_msg)
+            print(f"** {self.counter}: AT time: {time()}\
+                  Received {to_print} from {incoming_msg.owner.name}")
+            self.counter += 1
 
 
 def main():
@@ -38,10 +39,10 @@ def main():
     # In python select case is implemented using dicts
     p.select_chan.update({
         'IN1': lambda x: f"{x.value} at IN1",
-        'IN2': lambda x: f"{x.value} at IN12"
+        'IN2': lambda x: f"{x.value} at IN2",
     })
-
     r1.outputs.Rand_OUT.connect(p.inputs.IN1)
+    # change to p.inputs.IN2 if IN2 port registered
     r2.outputs.Rand_OUT.connect(p.inputs.IN2)
 
     g = Graph('TrialReceiveMessages')

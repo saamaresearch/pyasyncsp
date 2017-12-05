@@ -1,5 +1,5 @@
 import asyncio
-from random import random
+from random import random, randint
 
 from pyasyncsp import Pyroutine
 from pyasyncsp.port import InputPort, OutputPort
@@ -53,6 +53,25 @@ class RandomSource(Pyroutine):
             while True:
                 # generate IP containing random number
                 a = Message(random(), owner=self)
+                # send to the output port
+                await self.outputs.Rand_OUT.send_message(a)
+                await asyncio.sleep(randint(1,5))
+
+
+class ManualInput(Pyroutine):
+        """
+        This Node generates random no signals
+        """
+        def __init__(self, name='manIp'):
+            super(ManualInput, self).__init__(name)
+            self.name = name
+            self.outputs.add(OutputPort("Rand_OUT"))
+
+        async def __call__(self):
+            while True:
+                # generate IP containing random number
+                value = input('Enter your message')
+                a = Message(value, owner=self)
                 # send to the output port
                 await self.outputs.Rand_OUT.send_message(a)
                 await asyncio.sleep(2)

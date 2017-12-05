@@ -1,4 +1,5 @@
 import asyncio
+import functools
 from collections import OrderedDict
 
 from .message import Message, InitMessage, FINMessage
@@ -30,8 +31,10 @@ class Port(object):
 
     def kickstart(self):
         message = Message(None)
-        self.queue.put_nowait(message)
-        print('Kickstarting port {}'.format(self.node, self.name))
+        # import ipdb; ipdb.set_trace()
+        self.connections[0].queue.put_nowait(message)
+        # self.send_message(message)
+        # print('Kickstarting port {}'.format(self.node, self.name))
 
     async def receive(self):
         message = await self.receive_message()
@@ -48,7 +51,7 @@ class Port(object):
 
     @property
     def is_connected(self):
-        return len(self.connections)>0
+        return len(self.connections) > 0
 
     def connect(self, other_port, size=100):
         new_conn = Connection(size=size)
@@ -80,13 +83,14 @@ class Port(object):
         message = Message(data, owner=self.node)
         await self.send_message(message)
 
-    async def receive_message(self):
+    async def receive_message(self, with_name=False):
         if self.is_connected:
             if self.open:
                 print("Receiving at {}".format(self.name))
                 done, pending = await asyncio.wait([conn.receive() for conn in self.connections], return_when=asyncio.FIRST_COMPLETED)
                 # import ipdb;ipdb.set_trace()
                 message = done.pop().result()
+                message.decr_hopcount
                 [task.cancel() for task in pending]
                 print(
                     "Received {} from {}".format(message, self.name))
@@ -98,12 +102,20 @@ class Port(object):
                     print(stop_message)
                     raise StopAsyncIteration(stop_message)
                 else:
-                    return message
+                    if not with_name: 
+                        return message
+                    else:
+                        return self.name, message
             else:
                 raise StopAsyncIteration("stopp")
         else:
             # TODO: Raise appropriate error.
             pass
+
+    ''' def callback(self):
+        def wrapper(func):
+            @functools.wraps(func)
+            pass '''
 
     def __aiter__(self):
         return self
@@ -174,20 +186,28 @@ class PortRegister:
 
     def keys(self):
         return self.ports.keys()
-    
+
     async def receive_messages(self):
+        done, pending = await asyncio.wait([port.receive_message(with_name=True)
+                                            for port in self.values()],
+                                           return_when=asyncio.FIRST_COMPLETED)
+        pname, message = done.pop().result()
+        [task.cancel() for task in pending]
+        # import ipdb; ipdb.set_trace()
+        return pname, message
+
+    async def receive_messages_from_all():
         futures = {}
         messages = {}
         for p in self.values():
             messages[p.name] = await p.receive_message()
             if p.open:
                 futures[p.name] = asyncio.ensure_future(p.receive_message())
+        # try as completed.. and keep creating futures..
         for k, v in futures.items():
             data = await v
-            yield k, data
-        # TODO: remove the legacy lines if things dont brea
-        #     messages[k] = data
-        # return messages
+            messages[k] = data
+        return messages
 
     def __aiter__(self):
         return self
